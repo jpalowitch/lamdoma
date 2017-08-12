@@ -25,7 +25,7 @@ for (j in seq_along(plotnames)) {
   modes <- modes[unlist(lapply(modes, length)) > 0]
   mdf <- as.data.frame(matrix(0, ncol = length(modes[[1]]), nrow = length(modes) - 1))
   names(mdf) <- modes[[1]]
-  for (i in 2:length(modes)) mdf[i - 1, ] <- rev(as.numeric(modes[[i]]))
+  for (i in 2:length(modes)) mdf[i - 1, ] <- as.numeric(modes[[i]])
   modes <- mdf
   
   ddf_full <- data.frame(Dummy = rep(0, 2))
@@ -33,7 +33,7 @@ for (j in seq_along(plotnames)) {
   # Plotting mode data
   datalist <- lapply(1:length(modes), function(L) {
     name <- names(modes)[L]
-    voicing <- modes[[name]]
+    voicing <- rev(modes[[name]])
     guide <- L == length(modes)
     retobj <- plot_mode(voicing, name = name, guide = guide)
     return(retobj)

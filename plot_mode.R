@@ -51,7 +51,7 @@ plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, underto
     geom_tile() + guides(fill = FALSE) + 
     scale_fill_manual(values = c(rainbow(length(unique(melt_matcolor$TrueNote)) - 1), "#FFFFFF"),
                       labels = unique(melt_matcolor$TrueNote)) + 
-    geom_text(aes(label = Label)) + ggtitle(name)
+    geom_text(aes(label = Label), size = 3.5) + ggtitle(name)
   if (!guide)
     p <- p + guides(fill = FALSE)
   
