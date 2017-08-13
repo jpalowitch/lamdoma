@@ -1,8 +1,9 @@
 library(grid)
 library(gridExtra)
 
-source("read_ranges.R")
+#source("read_ranges.R")
 source("plot_mode.R")
+source("hz2note.R")
 
 # Getting plot and filenames
 fns <- list.files("voicings")
@@ -41,9 +42,15 @@ for (j in seq_along(plotnames)) {
   
   plotlist <- lapply(datalist, function (L) L[[1]])
   ggsave(file.path(plotdir, paste0(plotnames[j], ".png")), 
-         grid.arrange(grobs = plotlist, ncol = length(modes),
+         grid.arrange(grobs = plotlist, ncol = ceiling(length(modes) / 2),
                       top = textGrob(plotnames[j], gp = gpar(fontsize = 20))),
-         height = 5, width = 5 * length(modes))
+         height = 5 * 2, width = 5 * ceiling(length(modes) / 2))
+  
+  plotlist2 <- lapply(datalist, function (L) L[[3]])
+  ggsave(file.path(plotdir, paste0(plotnames[j], "__org.png")), 
+         grid.arrange(grobs = plotlist2, ncol = length(modes),
+                      top = textGrob(plotnames[j], gp = gpar(fontsize = 20))),
+         height = 12, width = 12)
   
   # Saving disturbance values
   ddf_full <- data.frame(matrix(0, nrow = 2, ncol = length(modes)))
@@ -68,7 +75,13 @@ for (j in seq_along(plotnames)) {
   
   plotlist <- lapply(datalist, function (L) L[[1]])
   ggsave(file.path(plotdir, paste0(plotnames[j], "__undertone.png")), 
-         grid.arrange(grobs = plotlist, ncol = length(modes),
+         grid.arrange(grobs = plotlist, ncol = ceiling(length(modes) / 2),
+                      top = textGrob(paste0(plotnames[j], " (undertones)"), gp = gpar(fontsize = 20))),
+         height = 5 * 2, width = 5 * ceiling(length(modes) / 2))
+  
+  plotlist2 <- lapply(datalist, function (L) L[[3]])
+  ggsave(file.path(plotdir, paste0(plotnames[j], "__undertone__org.png")), 
+         grid.arrange(grobs = plotlist2, ncol = length(modes),
                       top = textGrob(plotnames[j], gp = gpar(fontsize = 20))),
-         height = 5, width = 5 * length(modes))
+         height = 12, width = 12)
 }

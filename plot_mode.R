@@ -9,17 +9,15 @@ gg_color_hue <- function(n) {
 plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, undertone = FALSE) {
   
   k <- length(voicing)
+  voicing <- rev(voicing)
   modemat <- matrix(rep(voicing, njump), ncol = k, byrow = TRUE)
   if (undertone) {
     modemat <- modemat / njump:1
   } else {
     modemat <- modemat * 1:njump
   }
-  matindx <- apply(modemat, 2, function (f) {
-    sapply(f, function (fi) which.max(fi <= ranges$Quarter_Step_Down) - 1)
-  })
-  matcolor <- as.data.frame(sapply(as.data.frame(matindx), function (c) ranges$TrueNote[c]))
-  matlab <- as.data.frame(sapply(as.data.frame(matindx), function (c) ranges$Note[c]))
+  matcolor <- as.data.frame(apply(modemat, c(1, 2), function (entry) hz2note(entry)[1]))
+  matlab <- as.data.frame(apply(modemat, c(1, 2), function (entry) paste0(hz2note(entry), collapse = '')))
   melt_matlab <- melt(as.matrix(matlab))
   melt_matcolor <- melt(as.matrix(matcolor))
   names(melt_matcolor) <- c("Harmonic", "Voicing_Start", "Note")
@@ -42,6 +40,22 @@ plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, underto
   notes_of_interest <- melt_matcolor$TrueNote[counts > 1]
   adv <- sum((freqs_of_interest - round(freqs_of_interest))^2) / sum(counts > 1)
   
+  # Calculating reduced mat
+  redmm <- subset(melt_matcolor, !(melt_matcolor$TrueNote == 'NA'))
+  redmm$Voicing_Start <- rep(redmm$Voicing_Start[1], nrow(redmm))
+  redmm <- redmm[order(redmm$Frequency), ]
+  redmm$Harmonic <- 1:nrow(redmm)
+  p2 <- ggplot(data = redmm, aes(x = Voicing_Start, y = Harmonic, fill = TrueNote)) + 
+    geom_tile() + guides(fill = FALSE) + 
+    scale_fill_manual(values = c(rainbow(length(unique(melt_matcolor$TrueNote)) - 1), "#FFFFFF"),
+                      labels = unique(melt_matcolor$TrueNote)) + 
+    geom_text(aes(label = Label), size = 3.5) + ggtitle(name) + 
+    theme_minimal() + 
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.title.y = element_blank()) 
+  
   # Calculating relative disturbance variance
   means <- tapply(freqs_of_interest, notes_of_interest, mean)
   meanvec <- means[match(notes_of_interest, names(means))]
@@ -51,7 +65,7 @@ plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, underto
     geom_tile() + guides(fill = FALSE) + 
     scale_fill_manual(values = c(rainbow(length(unique(melt_matcolor$TrueNote)) - 1), "#FFFFFF"),
                       labels = unique(melt_matcolor$TrueNote)) + 
-    geom_text(aes(label = Label)) + ggtitle(name)
+    geom_text(aes(label = Label), size = 3.5) + ggtitle(name)
   if (!guide)
     p <- p + guides(fill = FALSE)
   
@@ -60,7 +74,7 @@ plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, underto
   names(ddf) <- name
   row.names(ddf) <- c("adv", "rdv")
   
-  return(list(p, ddf))
+  return(list(p, ddf, p2))
 }
   
   
