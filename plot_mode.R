@@ -61,11 +61,14 @@ plot_mode <- function (voicing, njump = 16, name = "name", guide = TRUE, underto
   meanvec <- means[match(notes_of_interest, names(means))]
   rdv <- sum((freqs_of_interest - meanvec)^2) / sum(counts > 1)
 
+  # Naming the voicing starts
+  melt_matcolor$Voicing_Start
   p <- ggplot(data = melt_matcolor, aes(x = Voicing_Start, y = Harmonic, fill = TrueNote)) + 
     geom_tile() + guides(fill = FALSE) + 
     scale_fill_manual(values = c(rainbow(length(unique(melt_matcolor$TrueNote)) - 1), "#FFFFFF"),
                       labels = unique(melt_matcolor$TrueNote)) + 
-    geom_text(aes(label = Label), size = 3.5) + ggtitle(name)
+    geom_text(aes(label = Label), size = 3.5) + ggtitle(name) + 
+    scale_x_discrete(labels=paste("Note", seq_along(voicing)))
   if (!guide)
     p <- p + guides(fill = FALSE)
   
